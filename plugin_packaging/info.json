@@ -1,0 +1,158 @@
+{
+    "name": "identitySHARK",
+    "author": "Atefeh Khajeh",
+    "version": "0.10",
+    "plugin_type": "other",
+    "linux_libraries": [
+    ],
+    "created_collections": [
+		{
+			"name": "identities",
+			"shard_key": [{"_id": "hashed"}]
+		}
+	],
+    "description": "Plugin to merge different developer identities.",
+    "requires": [],
+    "arguments": [
+        {
+            "name": "plugin_path",
+            "required": true,
+            "position": 1,
+            "type": "install",
+            "description": "path to root folder of plugin"
+        },
+        {
+            "name": "plugin_path",
+            "required": true,
+            "position": 1,
+            "type": "execute",
+            "description": "path to root folder of plugin"
+        },
+        {
+            "name": "db_user",
+            "required": false,
+            "position": 2,
+            "type": "execute",
+            "description": "database user for the mongodb"
+        },
+        {
+            "name": "db_password",
+            "required": false,
+            "position": 3,
+            "type": "execute",
+            "description": "password for the user of the mongodb"
+        },
+        {
+            "name": "db_database",
+            "required": true,
+            "position": 4,
+            "type": "execute",
+            "description": "name of the database in the mongodb"
+        },
+        {
+            "name": "db_hostname",
+            "required": true,
+            "position": 5,
+            "type": "execute",
+            "description": "hostname of the server, where the mongodb runs on"
+        },
+        {
+            "name": "db_port",
+            "required": true,
+            "position": 6,
+            "type": "execute",
+            "description": "port on which the mongodb is listening on"
+        },
+        {
+            "name": "db_authentication",
+            "required": false,
+            "position": 7,
+            "type": "execute",
+            "description": "databse against which users are authenticated"
+        },
+        {
+            "name": "project_name",
+            "required": true,
+            "position": 8,
+            "type": "execute",
+            "description": "name of the project to which the issue system belongs"
+        },
+        {
+            "name": "issueurl",
+            "required": true,
+            "position": 9,
+            "type": "execute",
+            "description": "url to the issue tracking system"
+        },
+        {
+            "name": "backend",
+            "required": true,
+            "position": 10,
+            "type": "execute",
+            "description": "backend to choose for the plugin execution"
+        },
+        {
+            "name": "token",
+            "required": false,
+            "position": 11,
+            "type": "execute",
+            "description": "token to use for api requests"
+        },
+        {
+            "name": "proxy_host",
+            "required": false,
+            "position": 12,
+            "type": "execute",
+            "description": "host to the proxy, if used"
+        },
+        {
+            "name": "proxy_port",
+            "required": false,
+            "position": 13,
+            "type": "execute",
+            "description": "port of the proxy"
+        },
+        {
+            "name": "proxy_user",
+            "required": false,
+            "position": 14,
+            "type": "execute",
+            "description": "user of the proxy"
+        },
+        {
+            "name": "proxy_password",
+            "required": false,
+            "position": 15,
+            "type": "execute",
+            "description": "password of the proxy"
+        },
+        {
+            "name": "debug",
+            "required": false,
+            "position": 16,
+            "type": "execute",
+            "description": "debug level (DEBUG, INFO, ERROR, WARNING)"
+        },
+        {
+            "name": "issue_user",
+            "required": false,
+            "position": 17,
+            "type": "execute",
+            "description": "username to use the issue system"
+        },
+        {
+            "name": "issue_password",
+            "required": false,
+            "position": 18,
+            "type": "execute",
+            "description": "password to use the issue system"
+        },
+        {
+            "name": "ssl_enabled",
+            "required": false,
+            "position": 19,
+            "type": "execute",
+            "description": "needs to be set if database uses ssl connection"
+        }
+    ]
+}

@@ -1,0 +1,24 @@
+{
+"collections":[
+      {
+         "fields":[
+            {
+               "type":"ObjectIdType",
+               "logical_type":"OID",
+               "field_name":"_id",
+               "desc": "Identifier of the document"
+            },
+            {
+               "sub_type": "ObjectIdType",
+               "type":"ArrayType",
+               "logical_type":"Name",
+               "field_name":"people",
+               "reference_to": "people",
+               "desc": "List of peoples that are linked to this identity."
+            }
+         ],
+         "desc": "One identity can have links to several people (meaning, one identity is one person).",
+         "collection_name":"identity"
+      }
+   ]
+}

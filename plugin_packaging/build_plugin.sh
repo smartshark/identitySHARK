@@ -2,8 +2,9 @@
 
 current=`pwd`
 mkdir -p /tmp/identitySHARK/
-cp -R ../identitySHARK /tmp/identitySHARK/
+cp -R ../identityshark /tmp/identitySHARK/
 cp ../setup.py /tmp/identitySHARK/
+cp ../main.py /tmp/identitySHARK/
 cp * /tmp/identitySHARK/
 cd /tmp/identitySHARK/
 

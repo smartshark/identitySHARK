@@ -10,12 +10,12 @@ if not sys.version_info[0] == 3:
 
 setup(
     name='identitySHARK',
-    version='0.1.0',
+    version='0.0.1',
     author='Atefeh Khajeh',
     author_email='atefehkhajeh12@gmail.com',
     description='Merge different developer identities toegether',
     install_requires=[],
-    dependency_links=['git+https://github.com/smartshark/pycoSHARK.git@1.0.9#egg=pycoshark-1.0.9'],
+    dependency_links=['git+https://github.com/smartshark/pycoSHARK.git@1.0.10#egg=pycoshark-1.0.10'],
     url='https://github.com/smartshark/identitySHARK',
     download_url='https://github.com/smartshark/identitySHARK/zipball/master',
     packages=find_packages(),

@@ -1,3 +1,6 @@
 mongoengine
 pymongo
-git+https://github.com/smartshark/pycoSHARK.git@1.0.10#egg=pycoshark-1.0.10
+pyjarowinkler
+distance
+scikit-learn
+git+https://github.com/smartshark/pycoSHARK.git@1.0.11#egg=pycoshark-1.0.11

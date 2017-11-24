@@ -1,18 +1,86 @@
 import logging
+import multiprocessing
+import os
+import pickle
 import timeit
 
-from mongoengine import connect
-
+import pandas as pd
+from mongoengine import connect, NotUniqueError
+from mongoengine.connection import disconnect
+from mongoengine.context_managers import switch_db
 from pycoshark.mongomodels import People, Identity
 from pycoshark.utils import create_mongodb_uri_string
 
+from identityshark.im_matching import prepare_single_data
+
 logger = logging.getLogger("main")
+
+
+class Worker(multiprocessing.Process):
+    def __init__(self, gbtModel, people, task_queue, cfg, number):
+        multiprocessing.Process.__init__(self)
+        self.gbtModel = gbtModel
+        self.task_queue = task_queue
+        self.people = people
+        self.alias = "worker%s" % number
+
+        uri = create_mongodb_uri_string(cfg.user, cfg.password, cfg.host, cfg.port, cfg.authentication_db,
+                                        cfg.ssl_enabled)
+        connect(cfg.database, host=uri, alias=self.alias, connect=False)
+
+    def run(self):
+        while True:
+            person_number = self.task_queue.get()
+            if person_number is None:
+                self.task_queue.task_done()
+                break
+
+            person = self.people[person_number]
+
+            with switch_db(Identity, self.alias) as Identity2:
+                identity = Identity2()
+
+                # Create a features list which contains a row for each person that the outer persons needs to be
+                # compared with
+                features = []
+                start_index = person_number + 1
+                for inner_person in self.people:
+                    features.append(prepare_single_data(person.email, person.name, inner_person.email,
+                                                        inner_person.name))
+
+                # Go through the results of the algorithm and if the result is 1 (True match) append it to the identity
+                # list
+                ids = [person.id]
+                for i, x in enumerate(self.improved_algo_2(features)):
+                    if x == 1:
+                        ids.append(self.people[i + start_index].id)
+
+                # Sort the ids so that the unique of the list field works
+                ids.sort()
+                identity.people = ids
+
+                # Try to store it, but do not store it if there is already a list with these matches
+                try:
+                    identity.save()
+                except NotUniqueError as e:
+                    pass
+
+            self.task_queue.task_done()
+
+    def improved_algo_2(self, features):
+        labels = ['e1', 's1', 's2', 's3', 's4', 't1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 'ns1', 'ns2', 'ns3',
+                  'ns4', 'in1', 'in2']
+        df = pd.DataFrame.from_records(features, columns=labels)
+        predicted = self.gbtModel.predict(df)
+        return predicted
 
 
 class IdentitySHARK(object):
 
     def __init__(self):
-        pass
+        # Load Model
+        path_to_model = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'gbt_final_model.sav')
+        self.gbtModel = pickle.load(open(path_to_model, 'rb'))
 
     def start(self, cfg):
         logger.setLevel(cfg.get_debug_level())
@@ -30,46 +98,22 @@ class IdentitySHARK(object):
         # Clear identity collection
         Identity.objects.all().delete()
 
-        # Array in which all identities that should be stored are kept
-        identities_to_store = []
+        disconnect()
 
-        # This gives us a speed up, as the function references do not need to be reevaluated each time
-        identities_to_store_append = identities_to_store.append
+        num_worker = 6
+        tasks = multiprocessing.JoinableQueue()
+        workers = [Worker(self.gbtModel, people, tasks, cfg, i) for i in range(0, num_worker)]
 
-        # Start index is used so that we can exclude some persons from comparison. E.g., if PersonA was
-        # already compared with PersonB, we do not need to compare PersonB with PersonA again
-        start_index = 1
+        for w in workers:
+            w.start()
 
-        # Todo: Could be paralleled easily (using multiprocessing here?)
-        for outer_person in people:
-            identity = Identity()
+        for i in range(0, 100):
+            tasks.put(i)
 
-            # This gives us a speed up, as the function references do not need to be reevaluated each time
-            append_to_identity_list = identity.people.append
-            append_to_identity_list(outer_person.id)
+        # Poison pill
+        for i in range(0,num_worker):
+            tasks.put(None)
 
-            for inner_person in people[start_index:]:
-
-                # Call algorithm, if it returns True, we need to add the persons id
-                if self.improved_algorithm(outer_person, inner_person):
-                    append_to_identity_list(inner_person.id)
-
-            identities_to_store_append(identity)
-            start_index += 1
-
-        # Todo: Check if a person is in multiple lists
-
-        # Insert identities
-        if identities_to_store:
-            Identity.objects.insert(identities_to_store)
-
+        tasks.join()
         elapsed = timeit.default_timer() - start_time
         logger.info("Execution time: %0.5f s" % elapsed)
-
-    def improved_algorithm(self, person1, person2):
-        name_person1 = person1.name
-        email_person1 = person1.email
-        name_person2 = person2.name
-        email_person2 = person2.email
-
-        return False

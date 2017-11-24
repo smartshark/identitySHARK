@@ -15,7 +15,7 @@ setup(
     author_email='atefehkhajeh12@gmail.com',
     description='Merge different developer identities toegether',
     install_requires=[],
-    dependency_links=['git+https://github.com/smartshark/pycoSHARK.git@1.0.10#egg=pycoshark-1.0.10'],
+    dependency_links=['git+https://github.com/smartshark/pycoSHARK.git@1.0.11#egg=pycoshark-1.0.11'],
     url='https://github.com/smartshark/identitySHARK',
     download_url='https://github.com/smartshark/identitySHARK/zipball/master',
     packages=find_packages(),

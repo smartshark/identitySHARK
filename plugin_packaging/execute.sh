@@ -23,4 +23,8 @@ if [ ! -z ${9} ] && [ ${9} != "None" ]; then
     COMMAND="$COMMAND --ssl"
 fi
 
+if [ ! -z ${10} ] && [ ${10} != "None" ]; then
+    COMMAND="$COMMAND --cores ${10}"
+fi
+
 $COMMAND

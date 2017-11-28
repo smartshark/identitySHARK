@@ -100,18 +100,18 @@ class IdentitySHARK(object):
 
         disconnect()
 
-        num_worker = 6
+        num_worker = cfg.num_cores
         tasks = multiprocessing.JoinableQueue()
         workers = [Worker(self.gbtModel, people, tasks, cfg, i) for i in range(0, num_worker)]
 
         for w in workers:
             w.start()
 
-        for i in range(0, 100):
+        for i in range(0, len(people)):
             tasks.put(i)
 
         # Poison pill
-        for i in range(0,num_worker):
+        for i in range(0, num_worker):
             tasks.put(None)
 
         tasks.join()

@@ -1,7 +1,8 @@
-import os
+import json
 import logging
 import logging.config
-import json
+import multiprocessing
+import os
 
 from pycoshark.utils import get_base_argparser
 
@@ -38,6 +39,8 @@ def start():
     parser = get_base_argparser('Plugin to merge different developer identities.', '0.0.1')
     parser.add_argument('--debug', help='Sets the debug level.', default='DEBUG',
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
+    parser.add_argument('--cores', help='Sets the number of cores to use.', default=multiprocessing.cpu_count(),
+                        type=int)
 
     args = parser.parse_args()
     cfg = Config(args)

@@ -83,6 +83,13 @@
             "position": 9,
             "type": "execute",
             "description": "needs to be set if database uses ssl connection"
+        },
+        {
+            "name": "cores",
+            "required": false,
+            "position": 10,
+            "type": "execute",
+            "description": "number of cores to use"
         }
     ]
 }

@@ -43,17 +43,16 @@ class Worker(multiprocessing.Process):
                 # Create a features list which contains a row for each person that the outer persons needs to be
                 # compared with
                 features = []
-                start_index = person_number + 1
                 for inner_person in self.people:
                     features.append(prepare_single_data(person.email, person.name, inner_person.email,
                                                         inner_person.name))
 
                 # Go through the results of the algorithm and if the result is 1 (True match) append it to the identity
                 # list
-                ids = [person.id]
+                ids = []
                 for i, x in enumerate(self.improved_algo_2(features)):
                     if x == 1:
-                        ids.append(self.people[i + start_index].id)
+                        ids.append(self.people[i].id)
 
                 # Sort the ids so that the unique of the list field works
                 ids.sort()

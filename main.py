@@ -41,6 +41,8 @@ def start():
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
     parser.add_argument('--cores', help='Sets the number of cores to use.', default=multiprocessing.cpu_count(),
                         type=int)
+    parser.add_argument('--start-index', help='Person number from which to start.', default=0, type=int)
+    parser.add_argument('--end-index', help='Person number where to stop.', default=0, type=int)
 
     args = parser.parse_args()
     cfg = Config(args)

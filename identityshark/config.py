@@ -26,6 +26,8 @@ class Config(object):
         self.authentication_db = args.db_authentication
         self.num_cores = args.cores
         self.debug = args.debug
+        self.start_index = args.start_index
+        self.end_index = args.end_index
         self.ssl_enabled = args.ssl
 
     def get_debug_level(self):

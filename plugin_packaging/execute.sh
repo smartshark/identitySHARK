@@ -27,4 +27,12 @@ if [ ! -z ${10} ] && [ ${10} != "None" ]; then
     COMMAND="$COMMAND --cores ${10}"
 fi
 
+if [ ! -z ${11} ] && [ ${11} != "None" ]; then
+    COMMAND="$COMMAND --start-index ${11}"
+fi
+
+if [ ! -z ${12} ] && [ ${12} != "None" ]; then
+    COMMAND="$COMMAND --end-index ${12}"
+fi
+
 $COMMAND

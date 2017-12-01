@@ -30,12 +30,10 @@ class Worker(multiprocessing.Process):
 
     def run(self):
         while True:
-            person_number = self.task_queue.get()
-            if person_number is None:
+            person = self.task_queue.get()
+            if person is None:
                 self.task_queue.task_done()
                 break
-
-            person = self.people[person_number]
 
             with switch_db(Identity, self.alias) as Identity2:
                 identity = Identity2()
@@ -91,12 +89,8 @@ class IdentitySHARK(object):
         connect(cfg.database, host=uri)
 
         # Get all people
-        people = list(People.objects.all())
+        people = list(People.objects.all().order_by('id'))
         logger.info("Found %d people..." % len(people))
-
-        # Clear identity collection
-        Identity.objects.all().delete()
-
         disconnect()
 
         num_worker = cfg.num_cores
@@ -106,7 +100,7 @@ class IdentitySHARK(object):
         for w in workers:
             w.start()
 
-        for i in range(0, len(people)):
+        for i in people[cfg.start_index:cfg.end_index]:
             tasks.put(i)
 
         # Poison pill

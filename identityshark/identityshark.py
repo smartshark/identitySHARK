@@ -17,9 +17,10 @@ logger = logging.getLogger("main")
 
 
 class Worker(multiprocessing.Process):
-    def __init__(self, gbtModel, people, task_queue, cfg, number):
+    def __init__(self, gbtModel, people, frequent_emails, task_queue, cfg, number):
         multiprocessing.Process.__init__(self)
         self.gbtModel = gbtModel
+        self.frequent_emails = frequent_emails
         self.task_queue = task_queue
         self.people = people
         self.alias = "worker%s" % number
@@ -43,7 +44,7 @@ class Worker(multiprocessing.Process):
                 features = []
                 for inner_person in self.people:
                     features.append(prepare_single_data(person.email, person.name, inner_person.email,
-                                                        inner_person.name))
+                                                        inner_person.name, self.frequent_emails))
 
                 # Go through the results of the algorithm and if the result is 1 (True match) append it to the identity
                 # list
@@ -91,11 +92,17 @@ class IdentitySHARK(object):
         # Get all people
         people = list(People.objects.all().order_by('id'))
         logger.info("Found %d people..." % len(people))
+        # get all email addresses with more than 10 occurences
+        email_counts = People.objects.aggregate(*[
+            {'$group': {'_id': '$email', 'count': {'$sum': 1}}},
+            {'$match': {'count': {'$gt': 9}}}
+        ])
+        frequent_emails = set([c['_id'] for c in email_counts])
         disconnect()
 
         num_worker = cfg.num_cores
         tasks = multiprocessing.JoinableQueue()
-        workers = [Worker(self.gbtModel, people, tasks, cfg, i) for i in range(0, num_worker)]
+        workers = [Worker(self.gbtModel, people, frequent_emails, tasks, cfg, i) for i in range(0, num_worker)]
 
         for w in workers:
             w.start()

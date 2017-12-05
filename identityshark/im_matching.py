@@ -70,22 +70,44 @@ def _normalize_name(name):
 
 
 def _email_similarity(email1, email2):
-    table = str.maketrans(dict.fromkeys('0123456789'))
-    if email1 == email2 or email1.lower() == email2.lower() or \
-                    str(email1).translate(table).lower() == str(email2).translate(table).lower():
-        return True
-    else:
+
+    # either email is None we can return Now
+    if not email1 or not email2:
         return False
 
+    if email1 == email2:
+        return True
 
-def prepare_single_data(email_1, name_1, email_2, name_2):
+    if email1.lower() == email2.lower():
+        return True
+
+    # no numbers and no empty / None after removing numbers
+    table = str.maketrans(dict.fromkeys('0123456789'))
+    email1 = str(email1).translate(table).lower()
+    email2 = str(email2).translate(table).lower()
+
+    # if only @domain.tld is left we can not really match
+    if email1.startswith('@') or email2.startswith('@'):
+        return False
+
+    if email1 and email2 and email1 == email2:
+        return True
+
+    # default is no match
+    return False
+
+
+def prepare_single_data(email_1, name_1, email_2, name_2, frequent_emails):
     normalized_name_1 = _normalize_name(name_1)
     normalized_name_2 = _normalize_name(name_2)
 
     prefix_1 = _normalize_name(email_1.split('@')[0])
     prefix_2 = _normalize_name(email_2.split('@')[0])
 
-    e1 = _email_similarity(email_1, email_2)
+    # only do email matching if they are not frequent
+    e1 = False
+    if email_1 not in frequent_emails and email_2 not in frequent_emails:
+        e1 = _email_similarity(email_1, email_2)
 
     s1 = _common_split(normalized_name_1, normalized_name_2)
     s2 = _common_split(normalized_name_1, prefix_2)

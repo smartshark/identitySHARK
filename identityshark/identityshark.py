@@ -5,7 +5,7 @@ import pickle
 import timeit
 
 import pandas as pd
-from mongoengine import connect, NotUniqueError
+from mongoengine import connect
 from mongoengine.connection import disconnect
 from mongoengine.context_managers import switch_db
 from pycoshark.mongomodels import People, Identity
@@ -53,14 +53,11 @@ class Worker(multiprocessing.Process):
                         ids.append(self.people[i].id)
 
                 # Sort the ids so that the unique of the list field works
-                ids.sort()
                 identity.people = ids
 
                 # Try to store it, but do not store it if there is already a list with these matches
-                try:
-                    identity.save()
-                except NotUniqueError as e:
-                    pass
+                identity.save()
+
 
             self.task_queue.task_done()
 

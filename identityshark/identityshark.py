@@ -48,17 +48,14 @@ class Worker(multiprocessing.Process):
 
                 # Go through the results of the algorithm and if the result is 1 (True match) append it to the identity
                 # list
-                ids = []
+                ids = [person.id]
                 for i, x in enumerate(self.improved_algo_2(features)):
                     if x == 1:
                         ids.append(self.people[i].id)
 
-                # Sort the ids so that the unique of the list field works
-                identity.people = ids
-
-                # Try to store it, but do not store it if there is already a list with these matches
+                # Make the ids unique, so that they only occur once
+                identity.people = list(set(ids))
                 identity.save()
-
 
             self.task_queue.task_done()
 

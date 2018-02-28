@@ -107,8 +107,8 @@ def prepare_single_data(email_1, name_1, email_2, name_2, frequent_emails):
     # only do email matching if they are not frequent
     e1 = False
     s4 = 0.0
-    t7 = 1.0
-    t8 = 1.0
+    t7 = 0.0
+    t8 = 0.0
     if email_1 not in frequent_emails and email_2 not in frequent_emails:
         e1 = _email_similarity(email_1, email_2)
         s4 = _common_split(prefix_2, prefix_1)
@@ -116,10 +116,10 @@ def prepare_single_data(email_1, name_1, email_2, name_2, frequent_emails):
         t8 = _two_top_distances(prefix_1, prefix_2)[1]
 
     s3 = 0.0
-    t5 = 1.0
-    t6 = 1.0
+    t5 = 0.0
+    t6 = 0.0
     ns3 = 0
-    in1 = 1.0
+    in1 = 0.0
     if email_1 not in frequent_emails:
         s3 = _common_split(normalized_name_2, prefix_1)
         t5 = _two_top_distances(normalized_name_2, prefix_1)[0]
@@ -128,10 +128,10 @@ def prepare_single_data(email_1, name_1, email_2, name_2, frequent_emails):
         in1 = _jaro_winkler(prefix_1, normalized_name_1)
 
     s2 = 0.0
-    t3 = 1.0
-    t4 = 1.0
+    t3 = 0.0
+    t4 = 0.0
     ns4 = 0
-    in2 = 1.0
+    in2 = 0.0
     if email_2 not in frequent_emails:
         s2 = _common_split(normalized_name_1, prefix_2)
         t3 = _two_top_distances(normalized_name_1, prefix_2)[0]

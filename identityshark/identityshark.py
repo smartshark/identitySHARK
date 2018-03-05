@@ -5,7 +5,7 @@ import pickle
 import timeit
 
 import pandas as pd
-from mongoengine import connect, NotUniqueError
+from mongoengine import connect
 from mongoengine.connection import disconnect
 from mongoengine.context_managers import switch_db
 from pycoshark.mongomodels import People, Identity
@@ -55,10 +55,7 @@ class Worker(multiprocessing.Process):
 
                 # Make the ids unique, so that they only occur once
                 identity.people = list(set(ids))
-                try:
-                    identity.save()
-                except NotUniqueError as e:
-                    pass
+                identity.save()
 
             self.task_queue.task_done()
 

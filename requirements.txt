@@ -4,4 +4,4 @@ pyjarowinkler
 distance
 scikit-learn==0.19.1
 pandas==0.21.0
-git+https://github.com/smartshark/pycoSHARK.git@1.0.11#egg=pycoshark-1.0.11
+git+https://github.com/smartshark/pycoSHARK.git@1.0.21#egg=pycoshark-1.0.21

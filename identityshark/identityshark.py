@@ -37,8 +37,6 @@ class Worker(multiprocessing.Process):
                 break
 
             with switch_db(Identity, self.alias) as Identity2:
-                identity = Identity2()
-
                 # Create a features list which contains a row for each person that the outer persons needs to be
                 # compared with
                 features = []
@@ -48,14 +46,15 @@ class Worker(multiprocessing.Process):
 
                 # Go through the results of the algorithm and if the result is 1 (True match) append it to the identity
                 # list
-                ids = [person.id]
+                identities_to_store = []
                 for i, x in enumerate(self.improved_algo_2(features)):
-                    if x == 1:
-                        ids.append(self.people[i].id)
+                    if x == 1 and person.id != self.people[i].id:
+                        identity = Identity2()
+                        identity.people = [person.id, self.people[i].id]
+                        identities_to_store.append(identity)
 
-                # Make the ids unique, so that they only occur once
-                identity.people = list(set(ids))
-                identity.save()
+                if identities_to_store:
+                    Identity2.objects.insert(identities_to_store)
 
             self.task_queue.task_done()
 

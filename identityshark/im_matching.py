@@ -61,8 +61,8 @@ def _two_top_distances(name1, name2):
 
 def _normalize_name(name):
     try:
-        dsl_name = re.sub(r'([^A-Za-z ])', ' ', name).strip().lower()
-        names = [n for n in re.split("[_,|;\W]+", dsl_name) if n != '']
+        dsl_name = re.sub(r'([^A-Za-z ])', ' ', re.sub("[(\[].*?[)\]]", "", name).split('@')[0]).strip().lower()
+        names = [str(n) for n in re.split("[_,|;\W]+", dsl_name) if n != '']
         normalized_name = ' '.join(names)
     except:
         normalized_name = ""

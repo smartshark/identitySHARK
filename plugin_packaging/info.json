@@ -28,80 +28,87 @@
             "type": "execute",
             "description": "path to root folder of plugin"
         },
+		{
+            "name": "project_name",
+            "required": true,
+            "position": 2,
+            "type": "execute",
+            "description": "name of the project"
+        },
         {
             "name": "db_user",
             "required": false,
-            "position": 2,
+            "position": 3,
             "type": "execute",
             "description": "database user for the mongodb"
         },
         {
             "name": "db_password",
             "required": false,
-            "position": 3,
+            "position": 4,
             "type": "execute",
             "description": "password for the user of the mongodb"
         },
         {
             "name": "db_database",
             "required": true,
-            "position": 4,
+            "position": 5,
             "type": "execute",
             "description": "name of the database in the mongodb"
         },
         {
             "name": "db_hostname",
             "required": true,
-            "position": 5,
+            "position": 6,
             "type": "execute",
             "description": "hostname of the server, where the mongodb runs on"
         },
         {
             "name": "db_port",
             "required": true,
-            "position": 6,
+            "position": 7,
             "type": "execute",
             "description": "port on which the mongodb is listening on"
         },
         {
             "name": "db_authentication",
             "required": false,
-            "position": 7,
+            "position": 8,
             "type": "execute",
             "description": "databse against which users are authenticated"
         },
         {
-            "name": "debug",
+            "name": "log_level",
             "required": false,
-            "position": 8,
+            "position": 9,
             "type": "execute",
             "description": "debug level (DEBUG, INFO, ERROR, WARNING)"
         },
         {
             "name": "ssl_enabled",
             "required": false,
-            "position": 9,
+            "position": 10,
             "type": "execute",
             "description": "needs to be set if database uses ssl connection"
         },
         {
-            "name": "cores",
+            "name": "cores_per_job",
             "required": false,
-            "position": 10,
+            "position": 11,
             "type": "execute",
             "description": "number of cores to use"
         },
         {
             "name": "start_index",
             "required": false,
-            "position": 11,
+            "position": 12,
             "type": "execute",
             "description": "start index"
         },
         {
             "name": "end_index",
             "required": false,
-            "position": 12,
+            "position": 13,
             "type": "execute",
             "description": "end index"
         }

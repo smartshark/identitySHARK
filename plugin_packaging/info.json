@@ -1,7 +1,7 @@
 {
     "name": "identitySHARK",
     "author": "Atefeh Khajeh",
-    "version": "0.10",
+    "version": "2.0.1",
     "plugin_type": "other",
     "linux_libraries": [
     ],

@@ -1,7 +1,4 @@
 mongoengine
 pymongo
-pyjarowinkler
-distance
-scikit-learn==0.19.1
-pandas==0.21.0
+jellyfish
 git+https://github.com/smartshark/pycoSHARK.git@1.0.21#egg=pycoshark-1.0.21

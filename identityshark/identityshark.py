@@ -1,30 +1,24 @@
 import logging
 import multiprocessing
-import os
-import pickle
 import timeit
 
-import pandas as pd
 from mongoengine import connect
 from mongoengine.connection import disconnect
 from mongoengine.context_managers import switch_db
 from pycoshark.mongomodels import People, Identity
 from pycoshark.utils import create_mongodb_uri_string
 
-from identityshark.im_matching import prepare_single_data
+from identityshark.rule_matcher import compare_people,prepare_data
 
 logger = logging.getLogger("main")
 
 
 class Worker(multiprocessing.Process):
-    def __init__(self, gbtModel, people, frequent_emails, task_queue, cfg, number):
+    def __init__(self, people, task_queue, cfg, number):
         multiprocessing.Process.__init__(self)
-        self.gbtModel = gbtModel
-        self.frequent_emails = frequent_emails
-        self.task_queue = task_queue
         self.people = people
+        self.task_queue = task_queue
         self.alias = "worker%s" % number
-
         uri = create_mongodb_uri_string(cfg.user, cfg.password, cfg.host, cfg.port, cfg.authentication_db,
                                         cfg.ssl_enabled)
         connect(cfg.database, host=uri, alias=self.alias, connect=False)
@@ -35,43 +29,26 @@ class Worker(multiprocessing.Process):
             if person is None:
                 self.task_queue.task_done()
                 break
-
             with switch_db(Identity, self.alias) as Identity2:
-                # Create a features list which contains a row for each person that the outer persons needs to be
-                # compared with
-                features = []
-                for inner_person in self.people:
-                    features.append(prepare_single_data(person.email, person.name, inner_person.email,
-                                                        inner_person.name, self.frequent_emails))
-
-                # Go through the results of the algorithm and if the result is 1 (True match) append it to the identity
-                # list
                 identities_to_store = []
-                for i, x in enumerate(self.improved_algo_2(features)):
-                    if x == 1 and person.id != self.people[i].id:
-                        identity = Identity2()
-                        identity.people = [person.id, self.people[i].id]
-                        identities_to_store.append(identity)
-
-                if identities_to_store:
-                    Identity2.objects.insert(identities_to_store)
-
+                if not person['is_bot']:
+                    for inner_person in self.people:
+                        if person['id']==inner_person['id'] or inner_person['is_bot']:
+                            continue
+                        match = compare_people(person,inner_person)
+                        if match>0:
+                            identity = Identity2()
+                            identity.people = [person['id'], inner_person['id']]
+                            identities_to_store.append(identity)
+                if not identities_to_store:
+                    identity = Identity2()
+                    identity.people = [person['id']]
+                    identities_to_store.append(identity)
+                Identity2.objects.insert(identities_to_store)
             self.task_queue.task_done()
-
-    def improved_algo_2(self, features):
-        labels = ['e1', 's1', 's2', 's3', 's4', 't1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 'ns1', 'ns2', 'ns3',
-                  'ns4', 'in1', 'in2']
-        df = pd.DataFrame.from_records(features, columns=labels)
-        predicted = self.gbtModel.predict(df)
-        return predicted
 
 
 class IdentitySHARK(object):
-
-    def __init__(self):
-        # Load Model
-        path_to_model = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'gbt_final_model.sav')
-        self.gbtModel = pickle.load(open(path_to_model, 'rb'))
 
     def start(self, cfg):
         logger.setLevel(cfg.get_debug_level())
@@ -80,12 +57,12 @@ class IdentitySHARK(object):
         # Connect to mongodb
         uri = create_mongodb_uri_string(cfg.user, cfg.password, cfg.host, cfg.port, cfg.authentication_db,
                                         cfg.ssl_enabled)
-        connect(cfg.database, host=uri)
+        connect(cfg.database, host=uri, alias="default")
 
         # Get all people
         people = list(People.objects.all().order_by('id'))
         logger.info("Found %d people..." % len(people))
-        # get all email addresses with more than 10 occurences
+        # get all email addresses with more than 10 occurrences
         email_counts = People.objects.aggregate(*[
             {'$group': {'_id': '$email', 'count': {'$sum': 1}}},
             {'$match': {'count': {'$gt': 9}}}
@@ -93,14 +70,27 @@ class IdentitySHARK(object):
         frequent_emails = set([c['_id'] for c in email_counts])
         disconnect()
 
+        with open("bots_emails.txt") as f:
+            bots_emails = f.readlines()
+        bots_emails = [x.strip() for x in bots_emails]
+
+        with open("bots_names.txt") as f:
+            bots_names = f.readlines()
+        bots_names = [x.strip() for x in bots_names]
+
+        # prepare data
+        people_prepared = []
+        for person in people:
+            people_prepared.append(prepare_data(person.id, person.name, person.email,frequent_emails,bots_names,bots_emails))
+
         num_worker = cfg.num_cores
         tasks = multiprocessing.JoinableQueue()
-        workers = [Worker(self.gbtModel, people, frequent_emails, tasks, cfg, i) for i in range(0, num_worker)]
+        workers = [Worker(people_prepared, tasks, cfg, i) for i in range(0, num_worker)]
 
         for w in workers:
             w.start()
 
-        for i in people[cfg.start_index:cfg.end_index]:
+        for i in people_prepared[cfg.start_index:cfg.end_index]:
             tasks.put(i)
 
         # Poison pill

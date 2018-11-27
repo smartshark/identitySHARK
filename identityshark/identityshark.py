@@ -14,11 +14,14 @@ logger = logging.getLogger("main")
 
 
 class Worker(multiprocessing.Process):
-    def __init__(self, people, task_queue, cfg, number):
+    def __init__(self, people, task_queue, cfg, number, started_tasks, logger):
         multiprocessing.Process.__init__(self)
         self.people = people
         self.task_queue = task_queue
         self.alias = "worker%s" % number
+        self.started_tasks = started_tasks
+        self.no_people = len(people)
+        self.logger = logger
         uri = create_mongodb_uri_string(cfg.user, cfg.password, cfg.host, cfg.port, cfg.authentication_db,
                                         cfg.ssl_enabled)
         connect(cfg.database, host=uri, alias=self.alias, connect=False)
@@ -29,6 +32,10 @@ class Worker(multiprocessing.Process):
             if person is None:
                 self.task_queue.task_done()
                 break
+            self.started_tasks.put(1)
+            current_progress = self.started_tasks.qsize()
+            if current_progress%1000==0:
+                self.logger.info("processing person %i/%i" % (current_progress,self.no_people))
             with switch_db(Identity, self.alias) as Identity2:
                 identities_to_store = []
                 if not person['is_bot']:
@@ -85,11 +92,14 @@ class IdentitySHARK(object):
 
         num_worker = cfg.num_cores
         tasks = multiprocessing.JoinableQueue()
-        workers = [Worker(people_prepared, tasks, cfg, i) for i in range(0, num_worker)]
+        started_tasks = multiprocessing.Queue()
+        workers = [Worker(people_prepared, tasks, cfg, i, started_tasks, logger) for i in range(0, num_worker)]
 
         for w in workers:
             w.start()
 
+        if cfg.end_index==0 or cfg.end_index>len(people_prepared):
+            cfg.end_index = len(people_prepared)
         for i in people_prepared[cfg.start_index:cfg.end_index]:
             tasks.put(i)
 

@@ -39,7 +39,7 @@ class Worker(multiprocessing.Process):
             with switch_db(Identity, self.alias) as Identity2:
                 identities_to_store = []
                 for inner_person in self.people:
-                    if person['id']==inner_person['id'] or inner_person['is_bot']:
+                    if person['id']==inner_person['id']:
                         continue
                     match = compare_people(person,inner_person)
                     if match>0:
@@ -82,8 +82,6 @@ class IdentitySHARK(object):
             blacklist_emails = f.readlines()
         blacklist_emails = set([x.strip() for x in blacklist_emails])
         whitelist_emails = set(cfg.whitelist_emails.split(','))
-        print(whitelist_emails)
-        print(blacklist_emails)
         frequent_emails = frequent_emails.difference(whitelist_emails)
         frequent_emails = frequent_emails.union(blacklist_emails)
 

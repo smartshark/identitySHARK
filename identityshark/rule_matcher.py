@@ -2,17 +2,13 @@ import sys
 import jellyfish
 #from pyjarowinkler import distance
 
-def prepare_data(id, name, email, frequent_emails, bots_names, bots_emails):
+def prepare_data(id, name, email, frequent_emails):
     name, is_jira = _normalize_name(name)
     email = _normalize_email(email, frequent_emails)
-    is_bot = name in bots_names or email in bots_emails
-    return {'id':id,'name':name, 'email':email, 'is_jira':is_jira, 'is_bot':is_bot}
+    return {'id':id,'name':name, 'email':email, 'is_jira':is_jira}
 
 
 def compare_people(person_one, person_two):
-    if person_one['is_bot'] or person_two['is_bot']:
-        # never match bots
-        return -1
     if (person_one['is_jira'] or person_two['is_jira']) and _match_name(person_one['name'],person_two['name']):
         return 3
     if _match_email(person_one['email'], person_two['email']):

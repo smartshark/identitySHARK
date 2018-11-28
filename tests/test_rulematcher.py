@@ -12,18 +12,15 @@ class test_rule_matcher(unittest.TestCase):
                                ("Jane Doe", "jane@doe.com", "John Doe (Jira)", "null"),
                                ("Jane Doe", "jane@doe.com", "John Doe (Jira)", None),
                                ("Jane1", "jane1@somecompany.com", "Jane2", "jane2@anothercompany.com"),
-                               ("dev","ml@project.com","Jane Doe","ml@project.com"),
                                ("Tom (JIRA)", "jira@apache.org", "Tom","vandenberget@aciworldwide.com"),
                               ]
         frequent_emails = {"jira@apache.org"}
-        bots_names = {"dev","user","zookeeper-dev", "zookeeper-user", "apachecon-discuss", "GitHub", "jiraposter@reviews.apache.org"}
-        bots_emails = {"dev-null@apache.org"}
 
         print("expected matches:")
         mistakes_matches = 0
         for test_tuple in expected_matches:
-            person_one = prepare_data("1", test_tuple[0],test_tuple[1], frequent_emails, bots_names, bots_emails)
-            person_two = prepare_data("2", test_tuple[2],test_tuple[3], frequent_emails, bots_names, bots_emails)
+            person_one = prepare_data("1", test_tuple[0],test_tuple[1], frequent_emails)
+            person_two = prepare_data("2", test_tuple[2],test_tuple[3], frequent_emails)
             match = compare_people(person_one, person_two)
             if match>0:
                 print("\tmatch (%i): (%s,%s)-(%s,%s)" % (match, test_tuple[0], test_tuple[1], test_tuple[2], test_tuple[3]))
@@ -34,8 +31,8 @@ class test_rule_matcher(unittest.TestCase):
         print("expected non-matches:")
         mistakes_nonmatches = 0
         for test_tuple in expected_nonmatches:
-            person_1 = prepare_data("1", test_tuple[0], test_tuple[1], frequent_emails, bots_names, bots_emails)
-            person_2 = prepare_data("2", test_tuple[2], test_tuple[3], frequent_emails, bots_names, bots_emails)
+            person_1 = prepare_data("1", test_tuple[0], test_tuple[1], frequent_emails)
+            person_2 = prepare_data("2", test_tuple[2], test_tuple[3], frequent_emails)
             match = compare_people(person_1, person_2)
             if match > 0:
                 mistakes_nonmatches = mistakes_nonmatches+1

@@ -22,18 +22,19 @@ print("fetching identities...")
 identities = list(Identity.objects.all())
 print("%s identities found" % len(identities))
 peopleset = []
+all_existing_people = set()
 for i,identity in enumerate(identities):
     if i%1000==0:
         print("%i - current number of identities: %i" % (i,len(peopleset)))
     people = set(identity.people)
-    is_new = True
-    for i,existing_people in enumerate(peopleset):
-        if people.intersection(existing_people):
-            peopleset[i] = existing_people.union(people)
-            is_new = False
-            break
-    if is_new:
+    is_existing = people.intersection(all_existing_people)
+    if is_existing:
+        for i,existing_people in enumerate(peopleset):
+            if people.intersection(existing_people):
+                peopleset[i] = existing_people.union(people)
+    else:
         peopleset.append(people)
+    all_existing_people = all_existing_people.union(people)
 
 print("%i identities in peopleset" % len(peopleset))
 

@@ -1,9 +1,0 @@
-hadoop.apache.org
-zookeeper.apache.org
-incubator.apache.org
-dev-null@apache.org
-@curator.apache.org
-githubbot@cord.dk
-@hbase.apache.org
-noreply@github.com
-@hadoop.apache.org

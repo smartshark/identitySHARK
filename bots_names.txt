@@ -1,7 +1,0 @@
-dev
-user
-zookeeper-dev
-zookeeper-user
-apachecon-discuss
-GitHub
-jiraposter@reviews.apache.org

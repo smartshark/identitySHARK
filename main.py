@@ -43,6 +43,7 @@ def start():
                         type=int)
     parser.add_argument('--start-index', help='Person number from which to start.', default=0, type=int)
     parser.add_argument('--end-index', help='Person number where to stop.', default=0, type=int)
+    parser.add_argument('--whitelist-emails', help='Comma separated list of omail addresses that should be considered when matching, even if they are frequent.', default='')
 
     args = parser.parse_args()
     cfg = Config(args)

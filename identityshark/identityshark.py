@@ -38,15 +38,14 @@ class Worker(multiprocessing.Process):
                 self.logger.info("processing person %i/%i" % (current_progress,self.no_people))
             with switch_db(Identity, self.alias) as Identity2:
                 identities_to_store = []
-                if not person['is_bot']:
-                    for inner_person in self.people:
-                        if person['id']==inner_person['id'] or inner_person['is_bot']:
-                            continue
-                        match = compare_people(person,inner_person)
-                        if match>0:
-                            identity = Identity2()
-                            identity.people = [person['id'], inner_person['id']]
-                            identities_to_store.append(identity)
+                for inner_person in self.people:
+                    if person['id']==inner_person['id'] or inner_person['is_bot']:
+                        continue
+                    match = compare_people(person,inner_person)
+                    if match>0:
+                        identity = Identity2()
+                        identity.people = [person['id'], inner_person['id']]
+                        identities_to_store.append(identity)
                 if not identities_to_store:
                     identity = Identity2()
                     identity.people = [person['id']]
@@ -69,6 +68,7 @@ class IdentitySHARK(object):
         # Get all people
         people = list(People.objects.all().order_by('id'))
         logger.info("Found %d people..." % len(people))
+
         # get all email addresses with more than 10 occurrences
         email_counts = People.objects.aggregate(*[
             {'$group': {'_id': '$email', 'count': {'$sum': 1}}},
@@ -77,19 +77,22 @@ class IdentitySHARK(object):
         frequent_emails = set([c['_id'] for c in email_counts])
         disconnect()
 
-        with open("bots_emails.txt") as f:
-            bots_emails = f.readlines()
-        bots_emails = [x.strip() for x in bots_emails]
-
-        with open("bots_names.txt") as f:
-            bots_names = f.readlines()
-        bots_names = [x.strip() for x in bots_names]
+        # use black and whitelist to modify frequent emails
+        with open("blacklist_emails.txt") as f:
+            blacklist_emails = f.readlines()
+        blacklist_emails = set([x.strip() for x in blacklist_emails])
+        whitelist_emails = set(cfg.whitelist_emails.split(','))
+        print(whitelist_emails)
+        print(blacklist_emails)
+        frequent_emails = frequent_emails.difference(whitelist_emails)
+        frequent_emails = frequent_emails.union(blacklist_emails)
 
         # prepare data
         people_prepared = []
         for person in people:
-            people_prepared.append(prepare_data(person.id, person.name, person.email,frequent_emails,bots_names,bots_emails))
+            people_prepared.append(prepare_data(person.id, person.name, person.email,frequent_emails))
 
+        # setup worker processes and create tasks
         num_worker = cfg.num_cores
         tasks = multiprocessing.JoinableQueue()
         started_tasks = multiprocessing.Queue()

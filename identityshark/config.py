@@ -29,6 +29,7 @@ class Config(object):
         self.start_index = args.start_index
         self.end_index = args.end_index
         self.ssl_enabled = args.ssl
+        self.whitelist_emails = args.whitelist_emails
 
     def get_debug_level(self):
         """

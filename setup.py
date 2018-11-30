@@ -10,7 +10,7 @@ if not sys.version_info[0] == 3:
 
 setup(
     name='identitySHARK',
-    version='0.0.1',
+    version='2.0.1',
     author='Atefeh Khajeh',
     author_email='atefehkhajeh12@gmail.com',
     description='Merge different developer identities toegether',

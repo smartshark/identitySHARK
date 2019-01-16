@@ -37,6 +37,7 @@ def start():
     logger.info("Starting identitySHARK...")
 
     parser = get_base_argparser('Plugin to merge different developer identities.', '0.0.1')
+    parser.add_argument('--project-name', help='ignored', default=None)
     parser.add_argument('--debug', help='Sets the debug level.', default='DEBUG',
                         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
     parser.add_argument('--cores', help='Sets the number of cores to use.', default=multiprocessing.cpu_count(),
